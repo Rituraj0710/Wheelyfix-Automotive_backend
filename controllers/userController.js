@@ -28,19 +28,62 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { 
+    name, 
+    email, 
+    password, 
+    phoneNumber,
+    address,
+    vehicles 
+  } = req.body;
 
-  const userExists = await User.findOne({ email });
+  // Validate input fields
+  if (!name || !email || !password || !phoneNumber) {
+    res.status(400);
+    throw new Error('Please fill in all required fields');
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    res.status(400);
+    throw new Error('Please enter a valid email address');
+  }
+
+  // Phone number validation
+  const phoneRegex = /^[0-9]{10}$/;
+  if (!phoneRegex.test(phoneNumber)) {
+    res.status(400);
+    throw new Error('Please enter a valid 10-digit phone number');
+  }
+
+  // Check if user already exists
+  const userExists = await User.findOne({ 
+    $or: [
+      { email: email.toLowerCase() },
+      { phoneNumber }
+    ]
+  });
 
   if (userExists) {
     res.status(400);
-    throw new Error('User already exists');
+    throw new Error('User already exists with this email or phone number');
   }
 
+  // Validate password strength
+  if (password.length < 6) {
+    res.status(400);
+    throw new Error('Password must be at least 6 characters long');
+  }
+
+  // Create user
   const user = await User.create({
     name,
-    email,
+    email: email.toLowerCase(),
     password,
+    phoneNumber,
+    address: address || {},
+    vehicles: vehicles || []
   });
 
   if (user) {
@@ -48,6 +91,9 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
+      vehicles: user.vehicles,
       isAdmin: user.isAdmin,
       token: generateToken(user._id),
     });
@@ -68,6 +114,9 @@ const getUserProfile = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
+      vehicles: user.vehicles,
       isAdmin: user.isAdmin,
     });
   } else {
@@ -76,4 +125,15 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { authUser, registerUser, getUserProfile };
+// @desc    Logout user / clear cookie
+// @route   POST /api/users/logout
+// @access  Private
+const logoutUser = asyncHandler(async (req, res) => {
+  // In a real implementation with server-side sessions, you would invalidate the session here
+  // Since we're using JWT tokens stored in localStorage on the client side,
+  // the actual logout happens on the client by removing the token
+  
+  res.status(200).json({ message: 'Logged out successfully' });
+});
+
+module.exports = { authUser, registerUser, getUserProfile, logoutUser };
