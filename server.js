@@ -3,6 +3,12 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const serviceRoutes = require('./routes/serviceRoutes');
+const brandRoutes = require('./routes/brandRoutes');
+const pricingRoutes = require('./routes/pricingRoutes');
+const cmsRoutes = require('./routes/cmsRoutes');
 
 dotenv.config();
 
@@ -15,6 +21,12 @@ app.use(express.json());
 
 // Routes
 app.use('/api/users', userRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/brands', brandRoutes);
+app.use('/api/pricing', pricingRoutes);
+app.use('/api/cms', cmsRoutes);
 
 // Serve static files from the public directory
 app.use(express.static('public'));
@@ -40,14 +52,16 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-
-const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-}).on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.log(`Port ${PORT} is already in use. Trying port ${PORT + 1}`);
-    server.listen(PORT + 1);
-  } else {
-    console.error('Server error:', err);
-  }
-});
+app
+  .listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  })
+  .on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use. Please stop the other process or set PORT to a different value.`);
+      process.exit(1);
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
