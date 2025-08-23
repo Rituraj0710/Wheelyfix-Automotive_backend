@@ -1,7 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const connectDB = require('./config/db');
+// const connectDB = require('./config/db');
+const { connect } = require('./config/db'); 
 const userRoutes = require('./routes/userRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
@@ -12,8 +13,8 @@ const cmsRoutes = require('./routes/cmsRoutes');
 
 dotenv.config();
 
-connectDB();
-
+// connectDB();
+connect();
 const app = express();
 
 app.use(cors());
