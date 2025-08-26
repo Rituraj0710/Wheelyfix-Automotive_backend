@@ -59,14 +59,23 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { 
-    name, 
-    email, 
-    password, 
-    phoneNumber,
-    address,
-    vehicles 
-  } = req.body || {};
+  const { name, email, password, phoneNumber, address, vehicles, isAdmin, adminSecret } = req.body || {};
+
+  // Check if trying to create admin user
+  if (isAdmin) {
+    // Require admin secret for admin user creation
+    const requiredAdminSecret = process.env.ADMIN_SECRET || 'wheelyfix-admin-2024';
+    if (adminSecret !== requiredAdminSecret) {
+      res.status(403);
+      throw new Error('Invalid admin secret key');
+    }
+  }
+
+  // Basic validation - check if required fields exist
+  if (!name || !email || !password || !phoneNumber) {
+    res.status(400);
+    throw new Error('Please fill in all required fields');
+  }
 
   // Lightweight diagnostics to surface root-cause for 500s during development
   if (process.env.NODE_ENV !== 'production') {
@@ -143,6 +152,7 @@ const registerUser = asyncHandler(async (req, res) => {
       phoneNumber: normalizedPhone,
       address: address && typeof address === 'object' ? address : {},
       vehicles: Array.isArray(vehicles) ? vehicles : [],
+      isAdmin: req.body.isAdmin || false, // Allow setting admin status during registration
     });
 
     if (user) {

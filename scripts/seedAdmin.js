@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const User = require('../models/userModel');
 
 async function main() {
-  const uri = process.env.MONGODB_URI;
+  const uri = process.env.MONGODB_URL;
   if (!uri) {
-    console.error('MONGODB_URI is not set in .env');
+    console.error('MONGODB_URL is not set in .env');
     process.exit(1);
   }
 
