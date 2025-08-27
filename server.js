@@ -30,6 +30,8 @@ app.use('/api/brands', brandRoutes);
 app.use('/api/pricing', pricingRoutes);
 app.use('/api/cms', cmsRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/categories', require('./routes/categoryRoutes'));
+app.use('/api/services', require('./routes/serviceRoutes'));
 
 // Serve static files from the public directory
 app.use(express.static('public'));
